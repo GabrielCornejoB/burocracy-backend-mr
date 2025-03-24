@@ -12,9 +12,10 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class User {
+public class UserModel {
     private UUID id;
     private String cc;
+    private String password;
     private String firstName;
     private String lastName;
     private Date birthDate;

@@ -11,61 +11,62 @@ import java.util.function.Function;
 
 import static java.util.stream.StreamSupport.stream;
 
-public abstract class AdapterOperations<E, D, I, R extends CrudRepository<D, I> & QueryByExampleExecutor<D>> {
-    protected R repository;
-    private Class<D> dataClass;
+public abstract class AdapterOperations<Model, Entity, Id, Repository extends CrudRepository<Entity, Id>
+        & QueryByExampleExecutor<Entity>> {
+    private final Class<Entity> dataClass;
+    private final Function<Entity, Model> toEntityFn;
+    protected Repository repository;
     protected ObjectMapper mapper;
-    private Function<D, E> toEntityFn;
 
     @SuppressWarnings("unchecked")
-    protected AdapterOperations(R repository, ObjectMapper mapper, Function<D, E> toEntityFn) {
+    protected AdapterOperations(Repository repository, ObjectMapper mapper, Function<Entity, Model> toEntityFn) {
         this.repository = repository;
         this.mapper = mapper;
         ParameterizedType genericSuperclass = (ParameterizedType) this.getClass().getGenericSuperclass();
-        this.dataClass = (Class<D>) genericSuperclass.getActualTypeArguments()[1];
+        this.dataClass = (Class<Entity>) genericSuperclass.getActualTypeArguments()[1];
         this.toEntityFn = toEntityFn;
     }
 
-    protected D toData(E entity) {
-        return mapper.map(entity, dataClass);
+    protected Entity toEntity(Model model) {
+        return mapper.map(model, dataClass);
     }
 
-    protected E toEntity(D data) {
-        return data != null ? toEntityFn.apply(data) : null;
+    protected Model toModel(Entity entity) {
+        return entity != null ? toEntityFn.apply(entity) : null;
     }
 
-    public E save(E entity) {
-        D data = toData(entity);
-        return toEntity(saveData(data));
+    public Model saveModel(Model model) {
+        Entity data = toEntity(model);
+        return toModel(saveEntity(data));
     }
 
-    protected List<E> saveAllEntities(List<E> entities) {
-        List<D> list = entities.stream().map(this::toData).toList();
-        return toList(saveData(list));
+    protected List<Model> saveListOfModels(List<Model> models) {
+        List<Entity> list = models.stream().map(this::toEntity).toList();
+        return toList(saveEntity(list));
     }
 
-    public List<E> toList(Iterable<D> iterable) {
-        return stream(iterable.spliterator(), false).map(this::toEntity).toList();
+    public List<Model> toList(Iterable<Entity> iterable) {
+        return stream(iterable.spliterator(), false).map(this::toModel).toList();
     }
 
-    protected D saveData(D data) {
-        return repository.save(data);
+    protected Entity saveEntity(Entity entity) {
+        return repository.save(entity);
     }
 
-    protected Iterable<D> saveData(List<D> data) {
-        return repository.saveAll(data);
+    protected Iterable<Entity> saveEntity(List<Entity> entities) {
+        return repository.saveAll(entities);
     }
 
-    public E findById(I id) {
-        return toEntity(repository.findById(id).orElse(null));
+    public Model findById(Id id) {
+        return toModel(repository.findById(id).orElse(null));
     }
 
-    public List<E> findByExample(E entity) {
-        return toList(repository.findAll( Example.of(toData(entity))));
+    public List<Model> findByExample(Model model) {
+        return toList(repository.findAll(Example.of(toEntity(model))));
     }
 
 
-    public List<E> findAll(){
+    public List<Model> findAll() {
         return toList(repository.findAll());
     }
 }

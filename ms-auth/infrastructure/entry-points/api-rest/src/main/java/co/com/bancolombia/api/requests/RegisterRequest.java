@@ -1,41 +1,41 @@
 package co.com.bancolombia.api.requests;
 
-import co.com.bancolombia.model.authentication.creators.UserCreator;
+import co.com.bancolombia.model.authentication.UserModel;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Value;
+import lombok.extern.jackson.Jacksonized;
 import org.hibernate.validator.constraints.Length;
 
 import java.util.Date;
 
-@Getter
-@Setter
+@Value
 @Builder
+@Jacksonized
 public class RegisterRequest {
     @NotBlank
     @Pattern(regexp = "^.{8}$|^.{11}$\n")
-    private String cc;
+    String cc;
 
     @NotBlank
     @Length(min = 8, max = 20)
-    private String password;
+    String password;
 
     @NotBlank
     @Length(min = 3, max = 50)
-    private String firstName;
+    String firstName;
 
     @NotBlank
     @Length(min = 3, max = 50)
-    private String lastName;
+    String lastName;
 
     @NotNull
-    private Date birthDate;
+    Date birthDate;
 
-    public static UserCreator toCreator(RegisterRequest registerRequest) {
-        return UserCreator.builder()
+    public static UserModel toModel(RegisterRequest registerRequest) {
+        return UserModel.builder()
                 .cc(registerRequest.getCc())
                 .password(registerRequest.getPassword())
                 .firstName(registerRequest.getFirstName())
@@ -43,4 +43,5 @@ public class RegisterRequest {
                 .birthDate(registerRequest.getBirthDate())
                 .build();
     }
+
 }
