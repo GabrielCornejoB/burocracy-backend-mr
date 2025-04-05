@@ -16,7 +16,7 @@ spring:
   datasource:
     url: "jdbc:postgresql://localhost:5432/postgres"
     username: "user"
-    password: "password123"
+    password: "password"
     driverClassName: "org.postgresql.Driver"
   jpa:
     properties:
