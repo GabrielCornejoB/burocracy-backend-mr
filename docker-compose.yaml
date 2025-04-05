@@ -10,3 +10,27 @@ services:
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
+  localstack:
+    container_name: "localstack-burocrasym"
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3:4566
+      - DEFAULT_REGION=us-east-1
+      - HOSTNAME=localstack
+      - HOSTNAME_EXTERNAL=localstack
+  aws-cli:
+    image: amazon/aws-cli
+    depends_on:
+      - localstack
+    volumes:
+      - ./testbucket:/aws
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+    command: >
+      "
+        aws s3api create-bucket --bucket my-bucket --region us-east-1 --endpoint-url=http://localstack:4566
+      "
