@@ -15,7 +15,7 @@ import java.util.Collections;
 @Service
 public class UserDetailsAdapter implements UserDetailsService {
 
-    private AuthenticationRepository authenticationRepository;
+    private final AuthenticationRepository authenticationRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

@@ -1,6 +1,6 @@
 package co.com.bancolombia.model.authentication.gateways;
 
-public interface TokenAdapter {
+public interface TokenGateway {
 
     String generateToken(String username);
 

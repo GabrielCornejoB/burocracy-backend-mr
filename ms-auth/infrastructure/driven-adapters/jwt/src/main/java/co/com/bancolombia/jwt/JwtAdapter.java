@@ -1,7 +1,9 @@
 package co.com.bancolombia.jwt;
 
-import co.com.bancolombia.model.authentication.gateways.TokenAdapter;
-import io.jsonwebtoken.Jwts;
+import co.com.bancolombia.model.authentication.gateways.TokenGateway;
+import co.com.bancolombia.utils.enums.HttpStatusCode;
+import co.com.bancolombia.utils.exceptions.GeneralException;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -10,8 +12,9 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+
 @Service
-public class JwtAdapter implements TokenAdapter {
+public class JwtAdapter implements TokenGateway {
 
     @Value("${jwt.secret-key}")
     private String secretKey;
@@ -22,34 +25,34 @@ public class JwtAdapter implements TokenAdapter {
     @Override
     public String generateToken(String username) {
         return Jwts.builder()
-                .subject(username)
-                .issuedAt(new Date())
-                .expiration(new Date((new Date()).getTime() + expirationTime))
-                .signWith(this.getSecretKey())
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + expirationTime))
+                .signWith(this.getSecretKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
     @Override
     public String getUsernameFromToken(String token) {
-        return Jwts.parser()
-                .decryptWith(this.getSecretKey()).build()
-                .parseSignedClaims(token)
-                .getPayload().getSubject();
+        return Jwts.parserBuilder()
+                .setSigningKey(this.getSecretKey()).build()
+                .parseClaimsJws(token)
+                .getBody().getSubject();
     }
 
     @Override
     public Boolean validateToken(String token) {
         try {
-            Jwts.parser().decryptWith(this.getSecretKey()).build().parseSignedClaims(token);
+            Jwts.parserBuilder().setSigningKey(this.getSecretKey()).build().parseClaimsJws(token);
             return Boolean.TRUE;
-//        } catch (UnsupportedJwtException e) {
-//            throw new GeneralException("El token JWT enviado no está soportado", HttpStatusCode.BAD_REQUEST);
-//        } catch (JwtException e) {
-//            throw new GeneralException("El token JWT enviado no pudo ser parseado", HttpStatusCode.BAD_REQUEST);
-//        } catch (IllegalArgumentException e) {
-//            throw new GeneralException("El token JWT no fue enviado o se encuentra vacío", HttpStatusCode.BAD_REQUEST);
-        } catch (Exception e) {
-            return false;
+        } catch (ExpiredJwtException e) {
+            throw new GeneralException("El token enviado está expirado", HttpStatusCode.BAD_REQUEST);
+        } catch (UnsupportedJwtException e) {
+            throw new GeneralException("El token JWT no está soportado", HttpStatusCode.BAD_REQUEST);
+        } catch (MalformedJwtException e) {
+            throw new GeneralException("El token JWT no es valido", HttpStatusCode.BAD_REQUEST);
+        } catch (IllegalArgumentException e) {
+            throw new GeneralException("Los claims del token JWT están vacíos", HttpStatusCode.BAD_REQUEST);
         }
     }
 

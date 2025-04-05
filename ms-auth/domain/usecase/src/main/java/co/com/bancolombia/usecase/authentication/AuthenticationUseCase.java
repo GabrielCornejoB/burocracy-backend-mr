@@ -2,7 +2,9 @@ package co.com.bancolombia.usecase.authentication;
 
 import co.com.bancolombia.model.authentication.UserLogin;
 import co.com.bancolombia.model.authentication.UserModel;
+import co.com.bancolombia.model.authentication.gateways.AuthManagerGateway;
 import co.com.bancolombia.model.authentication.gateways.AuthenticationRepository;
+import co.com.bancolombia.model.authentication.gateways.TokenGateway;
 import co.com.bancolombia.utils.enums.HttpStatusCode;
 import co.com.bancolombia.utils.exceptions.GeneralException;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +13,10 @@ import lombok.RequiredArgsConstructor;
 public class AuthenticationUseCase {
 
     private final AuthenticationRepository authenticationRepository;
+
+    private final AuthManagerGateway authManagerGateway;
+
+    private final TokenGateway tokenGateway;
 
     public UserModel register(UserModel model) {
         var existingUser = this.authenticationRepository.findByCc(model.getCc());
@@ -21,18 +27,15 @@ public class AuthenticationUseCase {
                     HttpStatusCode.CONFLICT
             );
         }
+        model.setPassword(this.authManagerGateway.encode(model.getPassword()));
 
         return this.authenticationRepository.createUser(model);
     }
 
-    public UserModel login(UserLogin credentials) {
-        var result = this.authenticationRepository.validateCredentials(credentials);
+    public String login(UserLogin credentials) {
+        var auth = this.authManagerGateway.authenticate(credentials);
 
-        if (result == null) {
-            throw new GeneralException("Las credenciales no son validas", HttpStatusCode.BAD_REQUEST);
-        }
-
-        return result;
+        return this.tokenGateway.generateToken(auth);
     }
 
 }
