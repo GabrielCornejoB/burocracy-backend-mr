@@ -18,6 +18,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+// TODO: Rename to JwtAuthenticationFilter or AuthenticationFilter
+// TODO: Tampoco debería estar en este adapter de JWT, debería ser un package de filters
 @NoArgsConstructor
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -25,7 +27,6 @@ public class JwtFilter extends OncePerRequestFilter {
     private static final String AUTH_HEADER_NAME = "Authorization";
     private static final String AUTH_HEADER_PREFIX = "Bearer ";
     private static final Integer AUTH_HEADER_SUBSTRING_INDEX = 7;
-
     @Autowired
     private JwtAdapter jwtAdapter;
 

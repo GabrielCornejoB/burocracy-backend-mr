@@ -25,7 +25,7 @@ public class UserDetailsAdapter implements UserDetailsService {
             throw new UsernameNotFoundException("No se encontró al usuario con cc: " + username);
         }
 
-        return new User(user.getCc(), user.getPassword(), Collections.emptyList());
+        return new User(user.getCc(), user.getPassword(), Collections.emptyList() /* TODO: Acá irían los roles */);
     }
-
+// TODO: Refactor, esto no es un adapter de JWT sino de spring security, o creo que en la misma capa de application
 }

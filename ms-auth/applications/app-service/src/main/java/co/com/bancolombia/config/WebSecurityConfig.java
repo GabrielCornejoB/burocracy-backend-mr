@@ -56,7 +56,7 @@ public class WebSecurityConfig {
                                 .requestMatchers("/authentication/**", "/test/public").permitAll()
                                 .anyRequest().authenticated()
                 );
-        
+
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
