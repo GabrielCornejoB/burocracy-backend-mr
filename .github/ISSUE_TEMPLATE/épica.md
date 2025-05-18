@@ -1,6 +1,6 @@
 ---
 name: Épica
-about: Plantilla para generar issues en formato de Work Item
+about: Plantilla para generar issues en formato de Épica
 title: ''
 labels: ''
 assignees: ''
